@@ -1,5 +1,7 @@
 package com.ramit;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -7,7 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 class OrderMicroserviceApplicationTests {
 
 	@Test
-	void contextLoads() {
+	public void contextLoads() {
+		assertEquals(1,1);
 	}
 
 }

@@ -25,7 +25,7 @@ public class PurchaseService {
 	@Autowired
 	purchaseItemRepository purchaseItemRepo;
 
-	public Purchase handlePaymentTransaction(Customer customer, Purchase purchase) {
+	public Purchase handlePaymentTransaction( Purchase purchase) {
 		return purchaseRepo.save(purchase);
 	}
 

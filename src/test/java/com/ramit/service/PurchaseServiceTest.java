@@ -16,14 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
 import org.springframework.data.jpa.domain.Specification;
 
 import com.ramit.Repositories.purchaseItemRepository;
 import com.ramit.Repositories.purchaseRepository;
 import com.ramit.dto.AdminOrderRequestDTO;
 import com.ramit.dto.PurchaseSpecification;
-import com.ramit.models.Customer;
 import com.ramit.models.OrderTransferDTO;
 import com.ramit.models.Purchase;
 import com.ramit.models.PurchaseItem;
@@ -39,15 +37,17 @@ public class PurchaseServiceTest {
 
 	@InjectMocks
 	PurchaseService purchaseServiceTest;
+
 	@Test
 	public void hadlePaymentTransactionTest() {
-		Customer customer = new Customer();
+
 		Purchase purchase = new Purchase();
 		when(purchaseRepo.save(any(Purchase.class))).thenReturn(purchase);
-		Purchase result = purchaseServiceTest.handlePaymentTransaction(customer, purchase);
+		Purchase result = purchaseServiceTest.handlePaymentTransaction(purchase);
 		assertNotNull(result);
 	}
-	//@Test
+
+	@Test
 	public void verifyPaymentTest() {
 		int order_id = 0;
 		String razorpay_order_id = "RAZOR_PAY_TEST";
@@ -58,6 +58,7 @@ public class PurchaseServiceTest {
 		boolean result = purchaseServiceTest.verifyPayment(order_id, razorpay_order_id, razorpay_id);
 		assertTrue(result);
 	}
+
 	@Test
 	public void FailPaymentTest() {
 		int order_id = 0;
@@ -67,6 +68,7 @@ public class PurchaseServiceTest {
 		boolean result = purchaseServiceTest.failPayment(order_id);
 		assertTrue(result);
 	}
+
 	@Test
 	public void getAdminDashboardOrderDetailsTest() {
 		List<Purchase> purchaseList = new ArrayList<>();
@@ -80,6 +82,7 @@ public class PurchaseServiceTest {
 		assertEquals(5, adminDashboardOrderDetails.getTotalOrderQty());
 		assertEquals(30.0f, adminDashboardOrderDetails.getTotalOrdersValue());
 	}
+
 	@Test
 	public void getAllpurchaseItemsforOrderIdTest() {
 		int order_id = 1;
@@ -91,6 +94,7 @@ public class PurchaseServiceTest {
 		assertNotNull(purchaseServiceTest.getAllpurchaseItemsforOrderId(order_id));
 
 	}
+
 	@Test
 	public void getAllSuccessfulOrdersZeroLength() {
 		AdminOrderRequestDTO admin_Order_request = new AdminOrderRequestDTO();
@@ -105,6 +109,7 @@ public class PurchaseServiceTest {
 		assertEquals(0, allSuccessfulOrders.size());
 
 	}
+
 	@Test
 	public void getAllSuccessfulOrdersNonZeroLength() {
 		AdminOrderRequestDTO admin_Order_request = new AdminOrderRequestDTO();

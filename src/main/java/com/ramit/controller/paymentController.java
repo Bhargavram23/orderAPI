@@ -44,7 +44,7 @@ public class paymentController {
 	}
 	
 	@GetMapping("/admin/ordersInfo")
-	public OrderTransferDTO transferToAdmin() {
+	public OrderTransferDTO getAdminDashboardOrderDetails() {
 		return purchaseService.getAdminDashboardOrderDetails();
 	}
 	
@@ -58,7 +58,7 @@ public class paymentController {
 		Purchase purchase = convertToPurchase(completeRequest, updateCustomer, new Purchase());
 
 		// making the transaction
-		Purchase savedPurchase = purchaseService.handlePaymentTransaction(updateCustomer, purchase);
+		Purchase savedPurchase = purchaseService.handlePaymentTransaction(purchase);
 
 		// return successful transaction
 		completeRequest.addressId = savedPurchase.getShippingAddressId();
@@ -72,9 +72,8 @@ public class paymentController {
 		orderRequest.put("currency", "INR");
 		orderRequest.put("receipt", "receipt#" + completeRequest.orderId);
 
-		Order order = razorpayClient.Orders.create(orderRequest);
+		completeRequest.razorPayOrderId = razorpayClient.Orders.create(orderRequest).get("id");
 
-		completeRequest.razorPayOrderId = order.get("id");
 
 		return completeRequest;
 	}

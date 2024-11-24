@@ -2,8 +2,14 @@ package com.ramit.dto;
 
 import com.ramit.models.PurchaseItem;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class CompleteOrderRequestDTO {
 		public PurchaseItem[] orderItems;
 		public Integer orderId;

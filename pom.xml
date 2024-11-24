@@ -124,7 +124,7 @@
 						</goals>
 						<configuration>
 							<excludes>
-								<exclude>com/ramit/controller/*</exclude>
+								<exclude>com/ramit/OrderMicroserviceApplication.class</exclude>
 								<exclude>com/ramit/dto/*</exclude>
 								<exclude>com/ramit/models/*</exclude>
 								<exclude>com/ramit/Repositories/*</exclude>
@@ -138,7 +138,7 @@
 						</goals>
 						<configuration>
 							<excludes>
-								<exclude>com/ramit/controller/*</exclude>
+								<exclude>com/ramit/OrderMicroserviceApplication.class</exclude>
 								<exclude>com/ramit/dto/*</exclude>
 								<exclude>com/ramit/models/*</exclude>
 								<exclude>com/ramit/Repositories/*</exclude>
