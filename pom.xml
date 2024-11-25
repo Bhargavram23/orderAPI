@@ -126,6 +126,7 @@
 							<excludes>
 								<exclude>com/ramit/OrderMicroserviceApplication.class</exclude>
 								<exclude>com/ramit/dto/*</exclude>
+								<exclude>com/ramit/configuration/*</exclude>
 								<exclude>com/ramit/models/*</exclude>
 								<exclude>com/ramit/Repositories/*</exclude>
 							</excludes>
@@ -140,6 +141,7 @@
 							<excludes>
 								<exclude>com/ramit/OrderMicroserviceApplication.class</exclude>
 								<exclude>com/ramit/dto/*</exclude>
+								<exclude>com/ramit/configuration/*</exclude>
 								<exclude>com/ramit/models/*</exclude>
 								<exclude>com/ramit/Repositories/*</exclude>
 							</excludes>
