@@ -33,15 +33,9 @@ public class paymentController {
 	PurchaseService purchaseService;
 	@Autowired
 	customerFeignClient fc;
-
-	final String RAZORPAY_KEY_ID = "rzp_test_UKY2DzhQPRLJoi";
-	final String RAZORPAY_KEY_SECRET = "Z6PIQJVA8jl1PjGIxmN3QLnt";
-
-	private final RazorpayClient razorpayClient;
-
-	public paymentController() throws Exception {
-		this.razorpayClient = new RazorpayClient(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET);
-	}
+	
+	@Autowired
+	 RazorpayClient razorpayClient;
 	
 	@GetMapping("/admin/ordersInfo")
 	public OrderTransferDTO getAdminDashboardOrderDetails() {

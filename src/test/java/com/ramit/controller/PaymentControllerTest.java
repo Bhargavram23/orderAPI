@@ -1,12 +1,14 @@
 package com.ramit.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,8 +33,9 @@ import com.ramit.models.Purchase;
 import com.ramit.models.PurchaseItem;
 import com.ramit.models.customerFeignClient;
 import com.ramit.service.PurchaseService;
-import com.razorpay.*;
-
+import com.razorpay.Order;
+import com.razorpay.OrderClient;
+import com.razorpay.RazorpayClient;
 
 @SpringBootTest
 @ExtendWith(value = { MockitoExtension.class })
@@ -49,17 +52,18 @@ public class PaymentControllerTest {
 	@MockBean
 	customerFeignClient fc;
 
-
+	
 	private RazorpayClient razorpayClient;
-	private ObjectMapper objectMapper;
+	
+	private OrderClient orderClient;
+	
 	private Order mockOrder;
+	private ObjectMapper objectMapper;
 
 	@BeforeEach
 	void setUp() {
 		mockMvc = MockMvcBuilders.standaloneSetup(paymentControllerTest).build();
 		objectMapper = new ObjectMapper(); // Initialize ObjectMapper
-		
-
 	}
 
 	@Test
@@ -94,10 +98,23 @@ public class PaymentControllerTest {
 
 		when(fc.upsertCustomerByExample(any(Customer.class))).thenReturn(customer);
 		when(purchaseService.handlePaymentTransaction(any(Purchase.class))).thenReturn(purchase);
+// --------------------------------------------------------------------------------
+      
+       razorpayClient  = mock(RazorpayClient.class);
+       OrderClient orderClient = mock(OrderClient.class);
+      Order mockOrder = mock(Order.class);
+       
+       Field orderClientField = RazorpayClient.class.getDeclaredField("Orders");
+       orderClientField.setAccessible(true); // Make private field accessible
+       orderClientField.set(razorpayClient, orderClient);
+       
+       paymentControllerTest.razorpayClient = razorpayClient;
+       
+       when(razorpayClient.Orders.create(any())).thenReturn(mockOrder);
+       when(mockOrder.get(any())).thenReturn("order_mock");
 
-//       razorpayClient = mock(RazorpayClient.class);  
-//	      mockOrder = mock(Order.class);
-
+// ---------------------------------------------------------------------------------
+       
 		mockMvc.perform(post("/order").contentType("application/json")
 				.content(objectMapper.writeValueAsString(completeRequest))) 
 				.andExpect(status().isOk()) 
@@ -110,6 +127,7 @@ public class PaymentControllerTest {
                 .andExpect(jsonPath("$.state").value("uttarpradesh"))
                 .andExpect(jsonPath("$.country").value("India"))
                 .andExpect(jsonPath("$.orderId").value(1))
+                .andExpect(jsonPath("$.razorPayOrderId").value("order_mock"))
                 .andExpect(jsonPath("$.customerId").value(1))
                 .andExpect(jsonPath("$.orderPrice").value(500.0))
                 .andExpect(jsonPath("$.orderQty").value(3))
