@@ -1,5 +1,6 @@
 package com.ramit.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -21,16 +22,24 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ramit.dto.AdminOrderRequestDTO;
 import com.ramit.dto.CompleteOrderRequestDTO;
 import com.ramit.models.Address;
 import com.ramit.models.Customer;
 import com.ramit.models.OrderTransferDTO;
 import com.ramit.models.Purchase;
 import com.ramit.models.PurchaseItem;
+import com.ramit.models.TxnStatusResponse;
 import com.ramit.models.customerFeignClient;
 import com.ramit.service.PurchaseService;
 import com.razorpay.Order;
@@ -137,5 +146,92 @@ public class PaymentControllerTest {
                 .andExpect(jsonPath("$.orderItems[1].name").value("APPLE IPHONE"))
                 .andExpect(jsonPath("$.orderItems[1].quantity").value(1));
 	}
+	
+	@Test
+	public void verifyPaymentTransactionSuccessPayment() throws Exception {
+		CompleteOrderRequestDTO completeOrderRequestDTO = CompleteOrderRequestDTO.builder().razorPayId("order_mock").orderId(1).razorPayOrderId("razorpay_id").build();
+		when(purchaseService.verifyPayment(any(int.class), any(String.class), any(String.class))).thenReturn(true);
+		// TxnStatusResponse expectedResponse = new TxnStatusResponse("success");
+		mockMvc.perform(post("/verify")
+				.contentType("application/json")
+				.content(objectMapper.writeValueAsString(completeOrderRequestDTO))
+				)
+		.andExpect(jsonPath("$.message").value("success"));
+		
+	}
+	
+	@Test
+	public void verifyPaymentTransactionRollbackSuccessPayment() throws Exception {
+		CompleteOrderRequestDTO completeOrderRequestDTO = CompleteOrderRequestDTO.builder().razorPayId("order_mock").orderId(1).razorPayOrderId("razorpay_id").build();
+		when(purchaseService.verifyPayment(any(int.class), any(String.class), any(String.class))).thenReturn(false);
+		// TxnStatusResponse expectedResponse = new TxnStatusResponse("success");
+		mockMvc.perform(post("/verify")
+				.contentType("application/json")
+				.content(objectMapper.writeValueAsString(completeOrderRequestDTO))
+				)
+		.andExpect(jsonPath("$.message").value("NA"));
+		
+	}
+	
+	@Test
+	public void verifyPaymentTransactionFailPayment() throws Exception{
+		CompleteOrderRequestDTO completeOrderRequestDTO = CompleteOrderRequestDTO.builder().orderId(1).build();
+		when(purchaseService.failPayment(any(int.class))).thenReturn(true);
+		mockMvc.perform(post("/verify")
+				.contentType("application/json")
+				.content(objectMapper.writeValueAsString(completeOrderRequestDTO))
+				)
+		.andExpect(jsonPath("$.message").value("fail"));
+	}
+	
+	@Test
+	public void verifyPaymentTransactionRollbackFailPayment() throws Exception{
+		CompleteOrderRequestDTO completeOrderRequestDTO = CompleteOrderRequestDTO.builder().orderId(1).build();
+		when(purchaseService.failPayment(any(int.class))).thenReturn(false);
+		mockMvc.perform(post("/verify")
+				.contentType("application/json")
+				.content(objectMapper.writeValueAsString(completeOrderRequestDTO))
+				)
+		.andExpect(jsonPath("$.message").value("NA"));
+	}
+	@Test
+	public void ViewAllSuccessfulOrders() throws JsonProcessingException, Exception {
+		PurchaseItem[] purchaseItems = new PurchaseItem[2];
+		purchaseItems[0] = PurchaseItem.builder().name("DELL LAPTOP").unitPrice(19.9f).quantity(2).build();
+		purchaseItems[1] = PurchaseItem.builder().name("APPLE IPHONE").unitPrice(60.0f).quantity(1).build();
+		List<PurchaseItem> purchaseItemsList = new ArrayList<PurchaseItem>(Arrays.asList(purchaseItems));
+		List<Purchase> successfulOrders = new ArrayList<>();
+		successfulOrders.add(Purchase.builder().email("rama@gmail.com").purchaseItemsList(purchaseItemsList).build());
+		when(purchaseService.getAllSuccessfulOrders(any(AdminOrderRequestDTO.class))).thenReturn(successfulOrders);
+		
+		MvcResult mvcResult = mockMvc.perform(post("/admin/orders")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(new AdminOrderRequestDTO()))
+				)
+		.andReturn();
+		
+		String resultResponse = mvcResult.getResponse().getContentAsString();
+		String expectedResponse = objectMapper.writeValueAsString(successfulOrders);
+		
+		assertEquals(resultResponse, expectedResponse);
+		
+	}
+	
+	@Test
+	public void ViewAllPurchaseItemsTest() throws Exception{
+		PurchaseItem[] purchaseItems = new PurchaseItem[2];
+		purchaseItems[0] = PurchaseItem.builder().name("DELL LAPTOP").unitPrice(19.9f).quantity(2).build();
+		purchaseItems[1] = PurchaseItem.builder().name("APPLE IPHONE").unitPrice(60.0f).quantity(1).build();
+		List<PurchaseItem> purchaseItemsList = new ArrayList<PurchaseItem>(Arrays.asList(purchaseItems));
+		
+		when(purchaseService.getAllpurchaseItemsforOrderId(0)).thenReturn(purchaseItemsList);	
+		
+		MvcResult mvcResult = mockMvc.perform(get("/admin/orders/0")).andReturn();
+		String expectedResponse = objectMapper.writeValueAsString(purchaseItemsList);
+		String resultResponse = mvcResult.getResponse().getContentAsString();
 
+		assertEquals(resultResponse, expectedResponse);;
+		
+	}
+	
 }
